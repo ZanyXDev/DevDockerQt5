@@ -18,7 +18,8 @@ services:
     container_name: qtcreator-dev
     environment:
       - TERM=xterm-256color
-      - XDG_RUNTIME_DIR=/tmp/runtime-developer
+      #- XDG_RUNTIME_DIR=/tmp/runtime-developer
+      - XDG_RUNTIME_DIR=/run/user/${USER_ID:-1000}
       - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
       - PULSE_COOKIE=/tmp/pulseaudio.cookie
       - XAUTHORITY=$XAUTH
@@ -53,6 +54,7 @@ services:
   # Используем тот же образ, что уже собран/скачан, 
   # чтобы не собирать Dockerfile второй раз
     image: ${QTCREATOR_IMAGE_NAME:-zanyxdev/5.15.8-qtcreator:v15.0.0}
+    user: "root:root"
     build:                
       context: .
       args:   
@@ -65,16 +67,13 @@ services:
         QTCREATOR_URL: ${QTCREATOR_URL}    
         CMDTOOLS_URL: ${CMDTOOLS_URL}
     volumes:
+      - src-volume:/usr/local/src
       - opt-volume:/opt
+      - ccache-volume:/ccache
     #Checking git clone sources and pre build
-    command: >
-      sh -c "if [ ! -f /opt/.initialized ]; then
-               echo 'First run...';
-               touch /opt/.initialized;
-             else
-               echo 'Skiped ...';
-               ls /opt
-             fi"         
+    entrypoint: []               # ← Ключевая строка: отключаем ENTRYPOINT образа
+    command: ["sh", "-c", "set -x; if [ ! -f /opt/.initialized ]; then echo '🔧 First run...'; touch /opt/.initialized; echo '✅ Flag created.'; else echo 'ℹ️ Already initialized.'; fi"]
+       
     # Гарантируем, что контейнер не будет перезапускаться после выполнения
     restart: "no" 
 volumes:
