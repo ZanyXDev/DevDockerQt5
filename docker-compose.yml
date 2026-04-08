@@ -1,0 +1,57 @@
+services:
+  qtcreator:
+    env_file:
+      - .env
+      - generate.env      
+    image: ${QTCREATOR_IMAGE_NAME:-zanyxdev/5.15.8-qtcreator:v15.0.0}
+    build:
+      context: .
+      args:   
+        # Используем переменные окружения хоста, которые нужно вычислить заранее
+        QT_VERSION: ${QT_VERSION_SHORT}
+        LANG: "ru-RU.UTF-8"
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+        CMAKE_URL: ${CMAKE_URL}
+        QTCREATOR_URL: ${QTCREATOR_URL}    
+        CMDTOOLS_URL: ${CMDTOOLS_URL}
+    container_name: qtcreator-dev
+    environment:
+      - TERM=xterm-256color
+      - XDG_RUNTIME_DIR=/tmp/runtime-developer
+      - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
+      - PULSE_COOKIE=/tmp/pulseaudio.cookie
+      - XAUTHORITY=$XAUTH
+      - ANDROID_ADB_SERVER_ADDRESS=host.docker.internal
+      - GPG_TTY=/dev/console
+    devices:
+      - /dev/dri:/dev/dri
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native
+      - ~/.config/pulse/cookie:/tmp/pulseaudio.cookie
+      - $XSOCK:$XSOCK
+      - $XAUTH:$XAUTH
+      - src-volume:/usr/local/src
+      - opt-volume:/opt
+      - ccache-volume:/ccache
+      - type: bind
+        source: $HOME/qtcreator-app
+        target: /home/developer    
+    stdin_open: true
+    tty: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    init: true  
+    command: bash         
+volumes:
+  src-volume:
+    name: ${SRC_VOLUME_NAME}
+  opt-volume:
+    name: ${OPT_VOLUME_NAME}
+  ccache-volume:
+    name: ${CCACHE_VOLUME}  
+      
