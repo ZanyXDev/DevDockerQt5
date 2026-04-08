@@ -37,6 +37,6 @@ set -a
 source .env
 set +a
 
+#docker compose up -d init-setup&& docker compose run --rm qtcreator bash
 #docker compose  build
-
-docker compose   run --rm --service-ports qtcreator bash
+docker compose run --rm qtcreator bash
