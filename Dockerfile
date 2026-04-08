@@ -8,25 +8,26 @@ ARG CMDTOOLS_URL
 ENV ANDROID_SDK_ROOT="/opt/android-sdk"
 ENV ANDROID_NDK_ROOT="/opt/android-sdk/ndk"    
 
-RUN set -eux; \
-    echo "go-faster apt"; \
-    echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/90nolanguages;\
-    echo 'APT::Get::Install-Recommends "false";'> /etc/apt/apt.conf.d/99nosuggest;\
-    echo 'APT::Get::Install-Suggests "false";' >> /etc/apt/apt.conf.d/99nosuggest;\
-    export DEBIAN_FRONTEND=noninteractive ;\
-    apt-get -y update  ;\
-    apt-get -y upgrade ;\
+RUN <<EOF
+    set -eux; 
+    echo "go-faster apt" 
+    echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/90nolanguages
+    echo 'APT::Get::Install-Recommends "false";'> /etc/apt/apt.conf.d/99nosuggest
+    echo 'APT::Get::Install-Suggests "false";' >> /etc/apt/apt.conf.d/99nosuggest
+    export DEBIAN_FRONTEND=noninteractive 
+    apt-get -y update  
+    apt-get -y upgrade 
     apt-get -y install wget unzip git
+EOF
 
 RUN <<EOF
-set -eux; \
+    set -eux; \
     [[ -d /opt/cmake ]] || mkdir /opt/cmake   
     [[ -d /opt/download/ ]] || mkdir /opt/download/ 
     [[ -d /opt/qt-creator ]] || mkdir /opt/qt-creator     
     [[ -d /opt/android-sdk]] || mkdir /opt/android-sdk 
     [[ -d ${ANDROID_NDK_ROOT}/samples ]] || mkdir -p ${ANDROID_NDK_ROOT}/samples 
     (  
-     printenv   
      wget -O /opt/download/cmake.tar.gz ${CMAKE_URL}
      wget -O /opt/download/qtcreator.deb ${QTCREATOR_URL}
      echo "Download ndk samples"
@@ -49,17 +50,12 @@ set -eux; \
 EOF
 
 RUN set -eux; \   
-    echo "setup darcula theme..."     ;\
-    cd /root ;\
-    git clone https://github.com/dracula/qtcreator.git || git -C /root/qtcreator pull ;\
-    cd /root/qtcreator ;\
-    cp dracula.xml          /opt/qt-creator/share/qtcreator/styles ;\
-    cp drakula.creatortheme /opt/qt-creator/share/qtcreator/themes ;\
-    cp drakula.figmatokens  /opt/qt-creator/share/qtcreator/themes 
-
-RUN set -eux; \   
     echo "Use Clone sources KDAB openssl" ;\
     git clone --depth 1 https://github.com/KDAB/android_openssl.git || git -C /opt/android-sdk/android_openssl pull
+
+RUN set -eux; \  	
+      mkdir -p /usr/local/src/fonts/adobe-fonts/source-code-pro ;\
+      git clone https://github.com/adobe-fonts/source-code-pro.git /usr/local/src/fonts/adobe-fonts/source-code-pro 
 
 #-------------------------------------------------------------------------------
 FROM ubuntu:22.04 AS stage_1
@@ -178,42 +174,56 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 ENV PATH="/opt/Qt/${QT_VERSION}-amd64-lts-lgpl/bin:${PATH}"
 ENV PATH="/opt/Qt/${QT_VERSION}-android-lts-lgpl/bin:${PATH}"
 ENV PATH="/opt/qt-creator/bin:${PATH}"
+
 ENV ANDROID_SDK_ROOT="/opt/android-sdk"
 ENV ANDROID_NDK_ROOT="/opt/android-sdk/ndk"    
+
+ENV FONT_PATH="/usr/local/src/fonts/adobe-fonts/source-code-pro"
 
 #Чтобы внутри контейнера работал отладчик, добавил это, решение взял отсюда
 #https://askubuntu.com/questions/41629/after-upgrade-gdb-wont-attach-to-process
 #RUN echo 0 > /etc/sysctl.d/10-ptrace.conf
-RUN set -eux; \  	
-      mkdir -p /usr/local/src/fonts/adobe-fonts/source-code-pro ;\
-      git clone https://github.com/adobe-fonts/source-code-pro.git /usr/local/src/fonts/adobe-fonts/source-code-pro 
 
-RUN set -eux; \  	
-    echo "/usr/local/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf ;\
-    echo "/opt/Qt/${QT_VERSION}-amd64-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf ;\
-    echo "/opt/Qt/${QT_VERSION}-android-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf ;\
-    /sbin/ldconfig ;\
-    echo "Generate locale" ;\
-    sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen ;\
-    locale-gen ;\
-    echo "Setup timezone" ;\
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime ;\
-    echo $TZ > /etc/timezone ;\
-    if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then \    
-      groupadd -g ${GROUP_ID} developer; \
-      useradd -u ${USER_ID} -g ${GROUP_ID} developer; \
-      install -d -m 0755 -o developer -g ${GROUP_ID} /home/developer; \
-      adduser developer sudo; \
-      echo "adding user developer to audio group"; \
-      adduser developer audio; \
-      echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; \      
-      mkdir -p /home/developer; \   
-      echo "finished installing"  ;\ 
-      chown ${USER_ID}:${GROUP_ID} -R /home/developer; \
+RUN <<EOF
+    set -eux
+    echo "/usr/local/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf 
+    echo "/opt/Qt/${QT_VERSION}-amd64-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf 
+    echo "/opt/Qt/${QT_VERSION}-android-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf 
+    /sbin/ldconfig 
+    echo "Generate locale" 
+    sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen 
+    locale-gen 
+    echo "Setup timezone" 
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime 
+    echo $TZ > /etc/timezone 
+    if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then 
+      groupadd -g ${GROUP_ID} developer
+      useradd -u ${USER_ID} -g ${GROUP_ID} developer
+      install -d -m 0755 -o developer -g ${GROUP_ID} /home/developer
+      adduser developer sudo
+      echo "adding user developer to audio group"
+      adduser developer audio
+      echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+      mkdir -p /home/developer                   
+      chown ${USER_ID}:${GROUP_ID} -R /home/developer
+      echo "finished installing"        
     fi    
-
+EOF
 COPY --from=eclipse-temurin:17 $JAVA_HOME $JAVA_HOME
-COPY --from=stage_0 ${USER_ID}:${GROUP_ID} /opt /opt
+COPY --from=stage_0 /opt /opt
+COPY --from=stage_0 $FONT_PATH $FONT_PATH
+
+RUN --mount=type=tmpfs,target=/workspace/build \
+    cd /workspace/build && \
+    echo "setup darcula theme..." && \   
+    git clone https://github.com/dracula/qtcreator.git || git -C /workspace/build/qtcreator pull && \
+    cd /workspace/build/qtcreator && \
+    ls -la && \
+    ls -la /opt/qt-creator/share/qtcreator && \    
+    cp dracula.xml          /opt/qt-creator/share/qtcreator/styles && \
+    cp drakula.creatortheme /opt/qt-creator/share/qtcreator/themes && \
+    cp drakula.figmatokens  /opt/qt-creator/share/qtcreator/themes  
+RUN chown ${USER_ID}:${GROUP_ID} -R /opt   
 
 USER developer  
 RUN set -eux; \
