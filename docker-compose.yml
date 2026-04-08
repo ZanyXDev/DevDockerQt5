@@ -1,10 +1,10 @@
 services:
-  qtcreator:
-    env_file:
-      - .env
-      - generate.env      
-    image: ${QTCREATOR_IMAGE_NAME:-zanyxdev/5.15.8-qtcreator:v15.0.0}
-    build:
+  qtcreator:   
+    image: ${QTCREATOR_IMAGE_NAME:-zanyxdev/5.15.8-qtcreator:v15.0.0}  
+    depends_on:
+      init-setup:
+        condition: service_completed_successfully   
+    build:                
       context: .
       args:   
         # Используем переменные окружения хоста, которые нужно вычислить заранее
@@ -46,7 +46,37 @@ services:
     security_opt:
       - seccomp:unconfined
     init: true  
-    command: bash         
+    command: bash 
+         
+  # Pre run setup (профиль "init")
+  init-setup:
+  # Используем тот же образ, что уже собран/скачан, 
+  # чтобы не собирать Dockerfile второй раз
+    image: ${QTCREATOR_IMAGE_NAME:-zanyxdev/5.15.8-qtcreator:v15.0.0}
+    build:                
+      context: .
+      args:   
+        # Используем переменные окружения хоста, которые нужно вычислить заранее
+        QT_VERSION: ${QT_VERSION_SHORT}
+        LANG: "ru-RU.UTF-8"
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+        CMAKE_URL: ${CMAKE_URL}
+        QTCREATOR_URL: ${QTCREATOR_URL}    
+        CMDTOOLS_URL: ${CMDTOOLS_URL}
+    volumes:
+      - opt-volume:/opt
+    #Checking git clone sources and pre build
+    command: >
+      sh -c "if [ ! -f /opt/.initialized ]; then
+               echo 'First run...';
+               touch /opt/.initialized;
+             else
+               echo 'Skiped ...';
+               ls /opt
+             fi"         
+    # Гарантируем, что контейнер не будет перезапускаться после выполнения
+    restart: "no" 
 volumes:
   src-volume:
     name: ${SRC_VOLUME_NAME}
