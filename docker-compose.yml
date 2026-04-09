@@ -57,22 +57,21 @@ services:
     user: "root:root"
     build:                
       context: .
-      args:   
-        # Используем переменные окружения хоста, которые нужно вычислить заранее
-        QT_VERSION: ${QT_VERSION_SHORT}
-        LANG: "ru-RU.UTF-8"
-        USER_ID: ${USER_ID}
-        GROUP_ID: ${GROUP_ID}
-        CMAKE_URL: ${CMAKE_URL}
-        QTCREATOR_URL: ${QTCREATOR_URL}    
-        CMDTOOLS_URL: ${CMDTOOLS_URL}
+    environment:
+        - USER_ID=${USER_ID}
+        - GROUP_ID=${GROUP_ID}
+        - LANG=ru-RU.UTF-8
+        - CMAKE_URL= ${CMAKE_URL}
+        - QTCREATOR_URL=${QTCREATOR_URL}    
+        - CMDTOOLS_URL=${CMDTOOLS_URL}            
     volumes:
+      - ${PWD}/init.sh:/root/init.sh 
       - src-volume:/usr/local/src
       - opt-volume:/opt
       - ccache-volume:/ccache
     #Checking git clone sources and pre build
     entrypoint: []               # ← Ключевая строка: отключаем ENTRYPOINT образа
-    command: ["sh", "-c", "set -x; if [ ! -f /opt/.initialized ]; then echo '🔧 First run...'; touch /opt/.initialized; echo '✅ Flag created.'; else echo 'ℹ️ Already initialized.'; fi"]
+    command: ["sh", "-c", "/root/init.sh"]
        
     # Гарантируем, что контейнер не будет перезапускаться после выполнения
     restart: "no" 
