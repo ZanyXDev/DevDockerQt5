@@ -71,7 +71,7 @@ services:
       - ccache-volume:/ccache
     #Checking git clone sources and pre build
     entrypoint: []               # ← Ключевая строка: отключаем ENTRYPOINT образа
-    command: ["sh", "-c", "/root/init.sh"]
+    command: ["sh", "-c", "chmod +x /root/init.sh; /root/init.sh"]
        
     # Гарантируем, что контейнер не будет перезапускаться после выполнения
     restart: "no" 
