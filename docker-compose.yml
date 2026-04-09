@@ -54,6 +54,14 @@ services:
   # Используем тот же образ, что уже собран/скачан, 
   # чтобы не собирать Dockerfile второй раз
     image: ${QTCREATOR_IMAGE_NAME:-zanyxdev/5.15.8-qtcreator:v15.0.0}
+    deploy:
+      resources:
+        limits:
+          cpus: '3.0'
+          memory: 8096M
+        reservations:
+          cpus: '1.0'
+          memory: 2048M
     user: "root:root"
     build:                
       context: .
@@ -71,7 +79,7 @@ services:
       - ccache-volume:/ccache
     #Checking git clone sources and pre build
     entrypoint: []               # ← Ключевая строка: отключаем ENTRYPOINT образа
-    command: ["sh", "-c", "chmod +x /root/init.sh; /root/init.sh"]
+    command: ["sh", "-c", "export QT_VERSION=${QT_VERSION}; chmod +x /root/init.sh; /root/init.sh"]
        
     # Гарантируем, что контейнер не будет перезапускаться после выполнения
     restart: "no" 
