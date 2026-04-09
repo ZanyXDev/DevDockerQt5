@@ -68,11 +68,12 @@ if [ ! -f /opt/.cloned ]; then
     cp -u drakula.creatortheme /opt/qt-creator/share/qtcreator/themes 
     cp -u drakula.figmatokens  /opt/qt-creator/share/qtcreator/themes  
     
-    echo '⎆ Git clone $QT_VERSION...'
+    echo "⎆ Git clone ${QT_VERSION}..."
     git clone --depth 1 --branch $QT_VERSION \
 		https://invent.kde.org/qt/qt/qt5.git /usr/local/src/qt5 || git -C /usr/local/src/qt5 pull		
+	ls -la /usr/local/src/qt5 	
     cd  /usr/local/src/qt5
-    echo '▹ Git clone $QT_VERSION submodule...' 
+    echo "▹ Git clone ${QT_VERSION} submodule..." 
     git -c submodule."qt3d".update=none \
         -c submodule."qtactiveqt".update=none \
         -c submodule."qtcanvas3d".update=none  \
