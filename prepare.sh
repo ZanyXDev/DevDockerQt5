@@ -30,12 +30,16 @@ echo "SRC_VOLUME_NAME=${QT_VERSION}-src-volume" >>.env
 echo "OPT_VOLUME_NAME=${QT_VERSION}-opt-volume" >>.env
 echo "CCACHE_VOLUME=ccache-volume" >>.env
 
-printenv
-
 # Загружаем статические конфиги в текущую сессию (опционально)
 set -a
 source .env
 set +a
+
+HOMEAPP="$HOME"/qtcreator-app
+echo "Creating QtCreatorApp directory..."  
+[[ -d $HOMEAPP ]] || mkdir $HOMEAPP  
+
+wget https://raw.githubusercontent.com/ZanyXDev/DevDockerQt5/refs/heads/main/init.sh
 
 #docker compose up -d init-setup&& docker compose run --rm qtcreator bash
 #docker compose  build
