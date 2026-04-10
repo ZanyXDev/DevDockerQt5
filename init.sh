@@ -100,7 +100,7 @@ fi
 
   if [ ! -f /opt/.builded_amd64 ]; then 
     echo '🔧 First run build Qt5 for target AMD64...'
-    touch /opt/.cloned; 
+    touch /opt/.builded_amd64; 
     echo '✅ Flag created.'
     rm -f -r -d /tmp/build_qt
     [[ -d /tmp/build_qt ]] || mkdir /tmp/build_qt
