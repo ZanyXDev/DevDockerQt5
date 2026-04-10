@@ -98,14 +98,13 @@ else
     echo 'ℹ️ Already cloned.'; 
 fi
 
-  if [ ! -f /opt/.builded_amd64 ]; then 
+ if [ ! -f /opt/.builded_amd64 ]; then 
     echo '🔧 First run build Qt5 for target AMD64...'
-    touch /opt/.builded_amd64; 
-    echo '✅ Flag created.'
+   
     rm -f -r -d /tmp/build_qt
     [[ -d /tmp/build_qt ]] || mkdir /tmp/build_qt
     cd /tmp/build_qt
-    echo '▹ Configure $QT_VERSION...'
+    echo "▹ Configure $QT_VERSION..."
     /usr/local/src/qt5/configure  \
         -release \
         -reduce-relocations \
@@ -147,12 +146,100 @@ fi
         -skip webview \
         -skip winextras \
         -prefix  /opt/Qt/${QT_VERSION}-amd64-lts-lgpl -v -pkg-config
-    echo '▹ Build $QT_VERSION...'
+    echo "▹ Build $QT_VERSION..."
     make -j $(nproc) 
-    echo '▹ Install $QT_VERSION...'
+    echo "▹ Install $QT_VERSION..."
     make -j $(nproc) install 
+    touch /opt/.builded_amd64; 
+    echo '✅ Flag created.'
 else 
     echo 'ℹ️ Already builded Qt5 for target AMD64.'; 
 fi
-       
-#chown ${USER_ID}:${GROUP_ID} -R /opt 
+
+if [ ! -f /opt/.builded_android ]; then 
+    echo '🔧 First run build Qt5 for target AMD64...'  
+    rm -f -r -d /tmp/build_qt
+    [[ -d /tmp/build_qt ]] || mkdir /tmp/build_qt
+    cd /tmp/build_qt
+    echo "▹ Configure $QT_VERSION..."
+    export SDK_PLATFORM=android-31
+    export SDK_BUILD_TOOLS=31.0.0
+    export MIN_NDK_PLATFORM=android-21
+    export ANDROID_NDK_ROOT="/opt/android-sdk/ndk"
+    export NDK_VERSION="22.1.7171670"
+    export ANDROID_HOME=/opt/android-sdk
+    export ANDROID_SDK_ROOT=${ANDROID_HOME}
+    export ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${NDK_VERSION}
+    export ANDROID_NDK_HOST=linux-x86_64
+    export ANDROID_NDK_PLATFORM=${MIN_NDK_PLATFORM}
+    export ANDROID_API_VERSION=${SDK_PLATFORM}
+    export ANDROID_BUILD_TOOLS_REVISION=${SDK_BUILD_TOOLS}
+    export ANDROID_NDK=$ANDROID_NDK_ROOT
+    export STANDALONE_EXTRA="--stl=libc++"
+    
+    /usr/local/src/qt5/configure  \
+    -ccache \
+    -opensource \
+    -confirm-license \
+    -xplatform android-clang \
+    -disable-rpath \
+    -android-ndk ${ANDROID_NDK_ROOT} \
+    -android-sdk ${ANDROID_HOME} \
+    -no-warnings-are-errors \
+    -nomake tests \
+    -nomake examples \
+    -qt-freetype \
+    -qt-harfbuzz \
+    -qt-libjpeg \
+    -qt-libpng \
+    -qt-pcre \
+    -qt-zlib \
+    -skip 3d \
+    -skip qtdocgallery \
+    -skip activeqt \
+    -skip canvas3d \
+    -skip connectivity \
+    -skip datavis3d \
+    -skip doc \
+    -skip gamepad \
+    -skip location \
+    -skip lottie \
+    -skip macextras  \
+    -skip networkauth \
+    -skip qtwebengine \
+    -skip quick3d \
+    -skip quicktimeline \
+    -skip remoteobjects \
+    -skip script \
+    -skip scxml \
+    -skip sensors \
+    -skip serialbus \
+    -skip serialport \
+    -skip speech \
+    -skip virtualkeyboard \
+    -skip wayland \
+    -skip webchannel \ 
+    -skip webengine \
+    -skip webglplugin \
+    -skip websockets \
+    -skip webview \
+    -skip x11extras \
+    -skip xmlpatterns \
+    -no-feature-d3d12 \
+    -ssl \
+    -skip winextras \
+    OPENSSL_INCDIR='/opt/android-sdk/android_openssl/ssl_1.1/include/' \
+    OPENSSL_LIBS_DEBUG="-llibssl -llibcrypto" \
+    OPENSSL_LIBS_RELEASE="-llibssl -llibcrypto" \
+    -prefix ${QT_PATH_ANDROID}
+    echo "▹ Build $QT_VERSION..."
+    make -j $(nproc) 
+    echo "▹ Install $QT_VERSION..."
+    make -j $(nproc) install 
+    touch /opt/.builded_android; 
+    echo '✅ Flag created.'
+else 
+    echo 'ℹ️ Already builded Qt5 for target android.'; 
+fi
+           
+chown ${USER_ID}:${GROUP_ID} -R /opt 
