@@ -231,7 +231,7 @@ if [ ! -f /opt/.builded_android ]; then
     OPENSSL_INCDIR='/opt/android-sdk/android_openssl/ssl_1.1/include/' \
     OPENSSL_LIBS_DEBUG="-llibssl -llibcrypto" \
     OPENSSL_LIBS_RELEASE="-llibssl -llibcrypto" \
-    -prefix ${QT_PATH_ANDROID}
+    -prefix /opt/Qt/${QT_VERSION}-android-lts-lgpl
     echo "▹ Build $QT_VERSION..."
     make -j $(nproc) 
     echo "▹ Install $QT_VERSION..."
