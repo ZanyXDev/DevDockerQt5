@@ -62,6 +62,7 @@ ENV ANDROID_NDK_ROOT="/opt/android-sdk/ndk"
 
 ENV QT_WEBKIT=${QT_WEBKIT:-"n"}
 ENV QT_WEBENGINE=${QT_WEBENGINE:-"n"}
+ENV CCACHE_DIR="/ccache"
 
 RUN set -eux; \
     echo "go-faster apt"; \
