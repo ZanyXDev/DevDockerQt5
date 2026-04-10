@@ -176,8 +176,8 @@ if [ ! -f /opt/.builded_android ]; then
     export ANDROID_BUILD_TOOLS_REVISION=${SDK_BUILD_TOOLS}
     export ANDROID_NDK=$ANDROID_NDK_ROOT
     export STANDALONE_EXTRA="--stl=libc++"
-    
-    /usr/local/src/qt5/configure  \
+
+/usr/local/src/qt5/configure  \
     -ccache \
     -opensource \
     -confirm-license \
@@ -218,7 +218,7 @@ if [ ! -f /opt/.builded_android ]; then
     -skip speech \
     -skip virtualkeyboard \
     -skip wayland \
-    -skip webchannel \ 
+    -skip webchannel \
     -skip webengine \
     -skip webglplugin \
     -skip websockets \
@@ -233,13 +233,13 @@ if [ ! -f /opt/.builded_android ]; then
     OPENSSL_LIBS_RELEASE="-llibssl -llibcrypto" \
     -prefix /opt/Qt/${QT_VERSION}-android-lts-lgpl
     echo "▹ Build $QT_VERSION..."
-    make -j $(nproc) 
+    make -j $(nproc)
     echo "▹ Install $QT_VERSION..."
-    make -j $(nproc) install 
-    touch /opt/.builded_android; 
+    make -j $(nproc) install
+    touch /opt/.builded_android
     echo '✅ Flag created.'
-else 
-    echo 'ℹ️ Already builded Qt5 for target android.'; 
+else
+    echo 'ℹ️ Already builded Qt5 for target android.'
 fi
-           
-chown ${USER_ID}:${GROUP_ID} -R /opt 
+
+chown ${USER_ID}:${GROUP_ID} -R /opt
