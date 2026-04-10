@@ -41,6 +41,4 @@ echo "Creating QtCreatorApp directory..."
 
 wget https://raw.githubusercontent.com/ZanyXDev/DevDockerQt5/refs/heads/main/init.sh
 
-#docker compose up -d init-setup&& docker compose run --rm qtcreator bash
-#docker compose  build
-docker compose run --rm qtcreator bash
+docker compose up init-setup

@@ -73,7 +73,7 @@ services:
         - QTCREATOR_URL=${QTCREATOR_URL}    
         - CMDTOOLS_URL=${CMDTOOLS_URL}            
     volumes:
-      - ${PWD}/init.sh:/root/init.sh 
+      - ${PWD}/init_second.sh:/root/init.sh 
       - src-volume:/usr/local/src
       - opt-volume:/opt
       - ccache-volume:/ccache
