@@ -66,6 +66,7 @@ services:
     build:                
       context: .
     environment:
+        - QT_VERSION=${QT_VERSION}
         - USER_ID=${USER_ID}
         - GROUP_ID=${GROUP_ID}
         - LANG=ru-RU.UTF-8
