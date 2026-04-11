@@ -39,6 +39,8 @@ HOMEAPP="$HOME"/qtcreator-app
 echo "Creating QtCreatorApp directory..."  
 [[ -d $HOMEAPP ]] || mkdir $HOMEAPP  
 
+wget https://raw.githubusercontent.com/ZanyXDev/DevDockerQt5/refs/heads/main/Dockerfile
+wget https://raw.githubusercontent.com/ZanyXDev/DevDockerQt5/refs/heads/main/docker-compose.yml
 wget https://raw.githubusercontent.com/ZanyXDev/DevDockerQt5/refs/heads/main/init_second.sh
 
 docker compose up init-setup
