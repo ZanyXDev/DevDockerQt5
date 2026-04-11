@@ -120,31 +120,29 @@ RUN set -eux; \
 #https://askubuntu.com/questions/41629/after-upgrade-gdb-wont-attach-to-process
 #RUN echo 0 > /etc/sysctl.d/10-ptrace.conf
 
-RUN <<EOF
-    set -eux
-    echo "/usr/local/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf 
-    echo "/opt/Qt/${QT_VERSION}-amd64-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf 
-    echo "/opt/Qt/${QT_VERSION}-android-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf 
-    /sbin/ldconfig 
-    echo "Generate locale" 
-    sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen 
-    locale-gen 
-    echo "Setup timezone" 
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime 
-    echo $TZ > /etc/timezone 
-    if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then 
-      groupadd -g ${GROUP_ID} developer
-      useradd -u ${USER_ID} -g ${GROUP_ID} developer
-      install -d -m 0755 -o developer -g ${GROUP_ID} /home/developer
-      adduser developer sudo
-      echo "adding user developer to audio group"
-      adduser developer audio
-      echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-      mkdir -p /home/developer                   
-      chown ${USER_ID}:${GROUP_ID} -R /home/developer
-      echo "finished installing"        
-    fi    
-EOF
+RUN echo "/usr/local/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf  &&\
+    echo "/opt/Qt/${QT_VERSION}-amd64-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf &&\
+    echo "/opt/Qt/${QT_VERSION}-android-lts-lgpl/lib" >> /etc/ld.so.conf.d/x86_64-linux-gnu.conf &&\
+    /sbin/ldconfig &&\
+    echo "Generate locale" &&\
+    sed -i -e 's/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/' /etc/locale.gen &&\
+    locale-gen &&\
+    echo "Setup timezone" &&\
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime &&\
+    echo $TZ > /etc/timezone &&\
+    if [ ${USER_ID:-0} -ne 0 ] && [ ${GROUP_ID:-0} -ne 0 ]; then \
+      groupadd -g ${GROUP_ID} developer &&\
+      useradd -u ${USER_ID} -g ${GROUP_ID} developer &&\
+      install -d -m 0755 -o developer -g ${GROUP_ID} /home/developer &&\
+      adduser developer sudo &&\
+      echo "adding user developer to audio group" &&\
+      adduser developer audio &&\
+      echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers &&\
+      mkdir -p /home/developer &&\
+      chown ${USER_ID}:${GROUP_ID} -R /home/developer &&\
+      echo "finished installing" ;\
+    fi
+
 COPY --from=eclipse-temurin:17 $JAVA_HOME $JAVA_HOME
 
 USER developer  
