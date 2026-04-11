@@ -42,7 +42,7 @@ if [ ! -f /opt/.initialized ]; then
     declare -a DOWNLOADS=(
         "${CMAKE_URL}#/opt/workspace/download/cmake.tar.gz"
         "${QTCREATOR_URL}#/opt/workspace/download/qtcreator.deb"
-        "${NDK_SAMPLES}#/opt/workspace/download/master.zip"
+        "${NDK_SAMPLES}#/opt/workspace/download/ndk-samples.zip"
         "${CMDTOOLS_URL}#/opt/workspace/download/commandlinetools.zip"
         "${BUNDLE_TOOLS}#/opt/workspace/download/bundletool.jar"
     )
@@ -59,10 +59,7 @@ if [ ! -f /opt/.initialized ]; then
     tar -xzf /opt/workspace/download/cmake.tar.gz --strip-components=1 -C /opt/cmake
     # Безопасная установка .deb 
     apt-get install -y /opt/workspace/download/qtcreator.deb 
-    unzip -o /opt/workspace/download/commandlinetools.zip -d /opt
-    unzip -o /opt/workspace/download/ndk-samples.zip -d "${ANDROID_NDK_ROOT}/samples"
-    cp /opt/workspace/download/bundletool.jar "${ANDROID_HOME}/bundletool-all-1.3.0.jar"
-
+    unzip -o /opt/workspace/download/commandlinetools.zip -d /opt   
     # Настройка структуры cmdline-tools для sdkmanager
     CMDLINE_TOOLS_ROOT="/opt/cmdline-tools"
     if [[ -d "${CMDLINE_TOOLS_ROOT}" ]] && [[ ! -d "${CMDLINE_TOOLS_ROOT}/latest" ]]; then
@@ -75,6 +72,10 @@ if [ ! -f /opt/.initialized ]; then
     echo '📲 Installing Android SDK/NDK components...'
     yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses > /dev/null 2>&1
     sdkmanager --sdk_root=${ANDROID_SDK_ROOT} "platforms;android-31" "build-tools;31.0.0" "ndk;22.1.7171670"
+    
+    unzip -o /opt/workspace/download/ndk-samples.zip -d "${ANDROID_NDK_ROOT}/samples"
+    cp /opt/workspace/download/bundletool.jar "${ANDROID_HOME}/bundletool-all-1.3.0.jar"
+
     touch /opt/.initialized
     echo '✅ Initialization stage complete.'
 else
@@ -107,8 +108,8 @@ if [ ! -f /opt/.cloned ]; then
     # Исправлена опечатка: drakula -> dracula
     cd /opt/workspace/dracula/qtcreator
     cp -u dracula.xml /opt/qt-creator/share/qtcreator/styles/
-    cp -u dracula.creatortheme /opt/qt-creator/share/qtcreator/themes/
-    cp -u dracula.figmatokens /opt/qt-creator/share/qtcreator/themes/
+    cp -u drakula.creatortheme /opt/qt-creator/share/qtcreator/themes/
+    cp -u drakula.figmatokens /opt/qt-creator/share/qtcreator/themes/
 
     echo "📥 Cloning Qt5 ${QT_VERSION}..."
     if [[ -d "/usr/local/src/qt5/.git" ]]; then
